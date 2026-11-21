@@ -10,6 +10,47 @@ One clone includes the pilot and research materials:
 git clone https://github.com/prk0024/btech-minor-proj-dhedhan.git
 ```
 
+## Reproduce the three borrower-level results
+
+From the repository root, run this command with [uv](https://docs.astral.sh/uv/).
+It sets up Python 3.12 with the pinned analysis packages, verifies the UCI workbook
+(downloading it on first use), fits the models, and prints all three percentages.
+
+```bash
+uv run --no-project --python 3.12 --with-requirements requirements.txt python demo.py --borrower-audit
+```
+
+If you already installed `requirements.txt` in a Python 3.12 environment,
+`python demo.py --borrower-audit` runs the same analysis.
+
+| Measure on the fixed pilot split | Expected result |
+| --- | ---: |
+| Same top group for a borrower across two refits, using correlation groups | 78.5% |
+| Same top group for a borrower across two refits, averaged over 30 size-matched random partitions | 80.6% |
+| Median share of the six monthly bill contributions cancelled when added together | 85.6% |
+
+For each of 500 held-out borrowers, the audit identifies the group with the
+largest absolute **signed sum** of contributions to the predicted log-odds.
+An exact tie goes to the first group in partition order. It compares the same
+borrower across all 45 pairs of the 10 bootstrap fits, giving 22,500 comparisons
+per partition. Each random partition keeps the correlation groups' sizes and
+stays fixed across those fits.
+
+For cancellation, each borrower and fit contributes one row. Using the six
+signed contributions for `BILL_AMT1` through `BILL_AMT6`, the cancelled share
+is `1 - abs(sum(contributions)) / sum(abs(contributions))`. The reported
+value is the median across all 5,000 rows pooled together. A row with zero
+total magnitude has an undefined fraction and is excluded from the median.
+
+The command prints the path to a new `runs/pilot-*/` directory.
+`borrower_audit.json` contains the full-precision results, counts and all 30
+random-partition scores. `bill_cancellation.csv` contains the six signed
+contributions, net, total magnitude and cancelled fraction for each borrower
+and fit. Its `audit_row_index` matches the zero-based indices in `splits.npz`.
+These descriptive results cover one dataset and one train/test split.
+
+## Archived pilot and population-wide rankings
+
 The recorded UCI logistic-regression pilot comes from `ExecCoDhe/Research-paper-code`
 at commit `88aef5b15a62311054c3dd92018778a735be26c0`. Its original files are in
 `results/`. The saved ranking stability scores are **0.9240** for the correlation

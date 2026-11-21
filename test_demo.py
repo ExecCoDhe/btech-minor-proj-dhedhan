@@ -1,9 +1,19 @@
 import unittest
 import numpy as np
 import pandas as pd
-from demo import group_cancellation, rbo, groups_from_training, kth_margin
+from demo import borrower_top1_agreement, group_cancellation, rbo, groups_from_training, kth_margin
 
 class Contracts(unittest.TestCase):
+    def test_top_group_agreement_within_borrowers(self):
+        # For borrower 0 the second group wins twice. For borrower 1 the
+        # first group always wins, including an exact tie in the first fit.
+        fits = [
+            np.array([[5, -4.8, -1], [-2, -1, 3]]),
+            np.array([[5, -3.5, -1], [-2, -1, 2.5]]),
+            np.array([[5, -4.5, -1], [-2, -1, 1]]),
+        ]
+        self.assertAlmostEqual(borrower_top1_agreement(fits, [[0, 1], [2]]), (1 / 3 + 1) / 2)
+
     def test_opposing_contributions_cancel(self):
         net, magnitude, fraction = group_cancellation([5.0, -4.8])
         self.assertAlmostEqual(net, 0.2)

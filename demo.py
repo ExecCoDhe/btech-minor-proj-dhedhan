@@ -10,6 +10,7 @@ import importlib.metadata
 import json
 import platform
 import time
+from itertools import combinations
 from pathlib import Path
 from tempfile import mkdtemp
 
@@ -65,14 +66,36 @@ def group_cancellation(contributions) -> tuple[float, float, float | None]:
     return net, magnitude, fraction
 
 
+def group_magnitudes(phi, groups):
+    """Absolute net log-odds contribution for each borrower and group."""
+    return np.column_stack([np.abs(phi[:, group].sum(axis=1)) for group in groups])
+
+
 def mean_stability(attributions, groups):
-    # Fixed grouping across all bootstrap models; abs AFTER the local group sum.
-    scores = [np.array([np.abs(phi[:, g].sum(axis=1)).mean() for g in groups])
-              for phi in attributions]
+    scores = [group_magnitudes(phi, groups).mean(axis=0) for phi in attributions]
     rankings = [np.argsort(-s, kind='stable').tolist() for s in scores]
     vals = [rbo(rankings[i], rankings[j]) for i in range(len(rankings))
             for j in range(i+1, len(rankings))]
     return float(np.mean(vals))
+
+
+def borrower_top1_agreement(attributions, groups):
+    """Mean within-borrower agreement over unordered pairs of refits."""
+    winners = [group_magnitudes(phi, groups).argmax(axis=1) for phi in attributions]
+    return float(np.mean([np.mean(a == b) for a, b in combinations(winners, 2)]))
+
+
+def bill_cancellation_table(attributions, audit_ids, features, groups):
+    months = [f'BILL_AMT{i}' for i in range(1, 7)]
+    indices = [features.index(month) for month in months]
+    if not any(set(group) == set(indices) for group in groups):
+        raise ValueError('Expected the six bill months to form one training-derived group')
+    rows = []
+    for seed, phi in enumerate(attributions):
+        for borrower, contributions in zip(audit_ids, phi[:, indices], strict=True):
+            net, magnitude, fraction = group_cancellation(contributions)
+            rows.append((seed, borrower, *contributions, net, magnitude, fraction))
+    return pd.DataFrame(rows, columns=['refit', 'audit_row_index', *months, 'net', 'magnitude', 'fraction'])
 
 
 def kth_margin(shifts, alpha):
@@ -84,11 +107,14 @@ def kth_margin(shifts, alpha):
     return float('inf') if k > len(a) else float(np.sort(a)[k-1])
 
 
-def run(bootstraps=10, random_partitions=30, *, output_dir=None):
+def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=False):
     if bootstraps < 2 or random_partitions < 1:
         raise ValueError('Need >=2 bootstrap fits and >=1 random partition')
     start = time.perf_counter()
     path = ROOT/'data/default_of_credit_card_clients.xls'
+    if borrower_audit:
+        from download_data import ensure_workbook
+        ensure_workbook(path)
     frame = pd.read_excel(path, header=1)
     assert len(frame) == 30000, 'Unexpected UCI row count'
     frame.columns = frame.columns.astype(str)
@@ -130,10 +156,13 @@ def run(bootstraps=10, random_partitions=30, *, output_dir=None):
     rng = np.random.default_rng(101)
     sizes = [len(g) for g in groups]
     random_scores = []
+    random_top1 = []
     for _ in range(random_partitions):
         perm = rng.permutation(X.shape[1])
         random_groups = [a.tolist() for a in np.split(perm,np.cumsum(sizes)[:-1])]
         random_scores.append(mean_stability(phis, random_groups))
+        if borrower_audit:
+            random_top1.append(borrower_top1_agreement(phis, random_groups))
     grouped = mean_stability(phis, groups)
     feature_stability = mean_stability(phis, [[i] for i in range(X.shape[1])])
     result = {'status':'preliminary single-split real-data logistic baseline; not full method validation',
@@ -171,6 +200,30 @@ def run(bootstraps=10, random_partitions=30, *, output_dir=None):
 
     np.savez_compressed(out/'splits.npz',train=train_ids,test=test_ids,audit=audit_ids)
     pd.DataFrame(metrics).to_csv(out/'metrics.csv',index=False)
+    if borrower_audit:
+        bills = bill_cancellation_table(phis, audit_ids, result['features'], groups)
+        defined = bills['fraction'].dropna()
+        median_fraction = float(defined.median()) if len(defined) else None
+        top1 = borrower_top1_agreement(phis, groups)
+        control = float(np.mean(random_top1))
+        summary = {
+            'audit_borrowers': len(audit_ids),
+            'bootstrap_fits': bootstraps,
+            'fit_pairs': result['bootstrap_pairs'],
+            'random_partitions': random_partitions,
+            'top1_agreement_correlation_groups': top1,
+            'top1_agreement_size_matched_random_mean': control,
+            'top1_agreement_by_random_partition': random_top1,
+            'bill_borrower_refit_rows': len(bills),
+            'undefined_bill_fractions': len(bills) - len(defined),
+            'median_bill_cancellation_fraction': median_fraction,
+        }
+        bills.to_csv(out / 'bill_cancellation.csv', index=False)
+        (out / 'borrower_audit.json').write_text(json.dumps(summary, indent=2, allow_nan=False) + '\n')
+        print(f'Borrower first-place agreement (correlated groups): {top1:.1%}')
+        print(f'Borrower first-place agreement (matched random groups): {control:.1%}')
+        median_label = 'undefined' if median_fraction is None else f'{median_fraction:.1%}'
+        print(f'Median six-month bill cancellation: {median_label}')
     (out/'pilot.json').write_text(json.dumps(result,indent=2))
     print(json.dumps({k:v for k,v in result.items() if k not in ['matched_random_scores','predictive_metrics_per_fit','features']},indent=2))
     print(f"Saved pilot results to {out.resolve()}")
@@ -181,6 +234,8 @@ if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--bootstraps',type=int,default=10)
     parser.add_argument('--random-partitions',type=int,default=30)
+    parser.add_argument('--borrower-audit', action='store_true',
+                        help='Verify or download the UCI workbook and report borrower-level results')
     parser.add_argument('--output-dir', type=Path, help='New directory for this run (default: runs/pilot-<unique suffix>)')
     args=parser.parse_args()
-    run(args.bootstraps,args.random_partitions,output_dir=args.output_dir)
+    run(args.bootstraps,args.random_partitions,output_dir=args.output_dir,borrower_audit=args.borrower_audit)
