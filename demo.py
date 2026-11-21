@@ -54,6 +54,17 @@ def rbo(a, b, p=0.85):
     return float((1-p)*sum(v*p**i for i,v in enumerate(overlaps)) + overlaps[-1]*p**len(a))
 
 
+def group_cancellation(contributions) -> tuple[float, float, float | None]:
+    """Return net, total magnitude and fraction cancelled for one group on one row."""
+    values = np.asarray(contributions, dtype=float)
+    if values.ndim != 1 or values.size == 0 or not np.isfinite(values).all():
+        raise ValueError("Expected a nonempty vector of finite feature contributions")
+    net = float(values.sum())
+    magnitude = float(np.abs(values).sum())
+    fraction = None if magnitude == 0 else 1 - abs(net) / magnitude
+    return net, magnitude, fraction
+
+
 def mean_stability(attributions, groups):
     # Fixed grouping across all bootstrap models; abs AFTER the local group sum.
     scores = [np.array([np.abs(phi[:, g].sum(axis=1)).mean() for g in groups])

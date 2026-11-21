@@ -1,9 +1,21 @@
 import unittest
 import numpy as np
 import pandas as pd
-from demo import rbo, groups_from_training, kth_margin
+from demo import group_cancellation, rbo, groups_from_training, kth_margin
 
 class Contracts(unittest.TestCase):
+    def test_opposing_contributions_cancel(self):
+        net, magnitude, fraction = group_cancellation([5.0, -4.8])
+        self.assertAlmostEqual(net, 0.2)
+        self.assertAlmostEqual(magnitude, 9.8)
+        self.assertAlmostEqual(fraction, 48 / 49)
+
+    def test_positive_contributions_have_zero_cancellation(self):
+        self.assertEqual(group_cancellation([2.0, 3.0]), (5.0, 5.0, 0.0))
+
+    def test_all_zero_contributions_have_undefined_cancellation(self):
+        self.assertEqual(group_cancellation([0.0, 0.0]), (0.0, 0.0, None))
+
     def test_identical_rbo(self):
         for n in [1,3,5,19]:
             self.assertAlmostEqual(rbo(list(range(n)),list(range(n))),1)
