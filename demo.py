@@ -26,6 +26,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parent
+PILOT_SPLIT_SEED = 20261027
 
 
 def groups_from_training(X, rho=0.7):
@@ -107,7 +108,8 @@ def kth_margin(shifts, alpha):
     return float('inf') if k > len(a) else float(np.sort(a)[k-1])
 
 
-def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=False, figures=False):
+def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=False, figures=False,
+        split_seed=PILOT_SPLIT_SEED):
     if bootstraps < 2 or random_partitions < 1:
         raise ValueError('Need >=2 bootstrap fits and >=1 random partition')
     start = time.perf_counter()
@@ -124,7 +126,7 @@ def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=
     X = frame.drop(columns=['ID','SEX','MARRIAGE','AGE','EDUCATION','default payment next month'])
     assert X.shape[1] == 19
     ids = np.arange(len(X))
-    train_ids, test_ids = train_test_split(ids, test_size=0.2, random_state=20261027, stratify=y)
+    train_ids, test_ids = train_test_split(ids, test_size=0.2, random_state=split_seed, stratify=y)
     assert not set(train_ids) & set(test_ids)
     train, test = X.iloc[train_ids], X.iloc[test_ids]
     groups, corr = groups_from_training(train)
@@ -168,6 +170,7 @@ def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=
     feature_stability = mean_stability(phis, [[i] for i in range(X.shape[1])])
     result = {'status':'preliminary single-split real-data logistic baseline; not full method validation',
               'dataset':'UCI Default of Credit Card Clients, ID 350', 'n_rows':len(frame),
+              'split_seed':split_seed,
               'train_rows':len(train_ids),'test_rows':len(test_ids),'audit_rows':len(audit),
               'default_prevalence':float(y.mean()),'features':X.columns.tolist(),
               'groups':[[X.columns[i] for i in g] for g in groups],
