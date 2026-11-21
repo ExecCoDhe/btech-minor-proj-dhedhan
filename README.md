@@ -1,6 +1,18 @@
 # COMET-XAI Lite: preliminary executable baseline
 
-Read `../03_Cursor_Implementation_Playbook.md` for the full research workflow.
+The recorded UCI logistic-regression pilot comes from `ExecCoDhe/Research-paper-code`
+at commit `88aef5b15a62311054c3dd92018778a735be26c0`. Its original files are in
+`results/`. The saved ranking stability scores are **0.9240** for the correlation
+groups and **0.8631** for the mean of 30 size-matched random partitions.
+`results/pilot.json` records the workbook SHA-256 and package versions,
+`results/metrics.csv` contains the per-fit metrics, and `results/splits.npz`
+contains the training, test and audit row IDs.
+
+Verify the archived results against the source commit from the repository root:
+
+```bash
+git diff --exit-code 88aef5b15a62311054c3dd92018778a735be26c0 -- results/
+```
 
 Python 3.12. Install `requirements.txt` in a virtual environment, then run:
 
@@ -10,10 +22,11 @@ python -m unittest -v test_demo.py
 python demo.py --bootstraps 10 --random-partitions 30
 ```
 
-This is an executed UCI logistic-regression explanation-stability baseline, not
-the complete proposed research system. The main script overwrites its own
-`results/pilot.json`, `metrics.csv` and `splits.npz` on rerun; copy results first if
-you change settings. The staged Cursor plan adds immutable run directories.
+Each successful run prints its new directory under `runs/`, containing
+`pilot.json`, `metrics.csv` and `splits.npz`. To choose a name, pass
+`--output-dir runs/my-pilot`. The directory must be new. The pilot uses split
+seed 20261027, audit seed 20, bootstrap seeds 0 through 9 for the default ten
+fits, and seed 101 for random partitions.
 
 Outputs contain data/split counts, group membership, metrics, versions and limits.
 `kth_margin` and its tests audit a quantile error in the supplied manual; they are

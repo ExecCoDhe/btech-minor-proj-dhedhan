@@ -11,6 +11,7 @@ import json
 import platform
 import time
 from pathlib import Path
+from tempfile import mkdtemp
 
 import numpy as np
 import pandas as pd
@@ -72,7 +73,7 @@ def kth_margin(shifts, alpha):
     return float('inf') if k > len(a) else float(np.sort(a)[k-1])
 
 
-def run(bootstraps=10, random_partitions=30):
+def run(bootstraps=10, random_partitions=30, *, output_dir=None):
     if bootstraps < 2 or random_partitions < 1:
         raise ValueError('Need >=2 bootstrap fits and >=1 random partition')
     start = time.perf_counter()
@@ -149,11 +150,19 @@ def run(bootstraps=10, random_partitions=30):
                             'no temporal, causal, recourse, or publication claim',
                             'grouping fixed; group discovery uncertainty not measured',
                             'random partition score spread is not a confidence interval']}
-    out=ROOT/'results';out.mkdir(exist_ok=True)
-    (out/'pilot.json').write_text(json.dumps(result,indent=2))
+    if output_dir is None:
+        runs = ROOT / 'runs'
+        runs.mkdir(exist_ok=True)
+        out = Path(mkdtemp(prefix='pilot-', dir=runs))
+    else:
+        out = Path(output_dir)
+        out.mkdir(parents=True, exist_ok=False)
+
     np.savez_compressed(out/'splits.npz',train=train_ids,test=test_ids,audit=audit_ids)
     pd.DataFrame(metrics).to_csv(out/'metrics.csv',index=False)
+    (out/'pilot.json').write_text(json.dumps(result,indent=2))
     print(json.dumps({k:v for k,v in result.items() if k not in ['matched_random_scores','predictive_metrics_per_fit','features']},indent=2))
+    print(f"Saved pilot results to {out.resolve()}")
     return result
 
 
@@ -161,5 +170,6 @@ if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--bootstraps',type=int,default=10)
     parser.add_argument('--random-partitions',type=int,default=30)
+    parser.add_argument('--output-dir', type=Path, help='New directory for this run (default: runs/pilot-<unique suffix>)')
     args=parser.parse_args()
-    run(args.bootstraps,args.random_partitions)
+    run(args.bootstraps,args.random_partitions,output_dir=args.output_dir)
