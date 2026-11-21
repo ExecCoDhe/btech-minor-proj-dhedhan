@@ -1,5 +1,34 @@
 # Five-split explanation stability experiment
 
+## Results
+
+Correlation grouping improved the overall ranking on **three of the four new
+splits**. Its mean advantage on the new splits was **+0.0184** in rank overlap,
+compared with **+0.0609** in the pilot. The first-reason result changed
+direction. Two new splits favored correlation grouping (+0.005 and +0.311
+percentage points) and two favored random grouping (−2.789 and −0.457 points).
+The +0.005-point difference was effectively a tie. Averaged across the four new
+splits, first-reason agreement was **0.732 percentage points lower** with
+correlation grouping.
+
+| Split seed | Overall rank overlap, correlation | Overall rank overlap, random | Difference | Same first reason, correlation | Same first reason, random | Difference (percentage points) | Median bill cancellation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 20261027 (pilot) | 0.9240 | 0.8631 | +0.0609 | 78.489% | 80.551% | −2.062 | 85.6% |
+| 20261028 | 0.9038 | 0.8559 | +0.0479 | 77.116% | 77.110% | +0.005 | 90.7% |
+| 20261029 | 0.8926 | 0.8717 | +0.0209 | 78.542% | 81.332% | −2.789 | 88.9% |
+| 20261030 | 0.8702 | 0.8638 | +0.0064 | 79.804% | 79.493% | +0.311 | 88.2% |
+| 20261031 | 0.8414 | 0.8432 | −0.0018 | 74.351% | 74.808% | −0.457 | 88.3% |
+
+Differences use unrounded scores. Across all five splits, the overall ranking
+difference ranged from −0.0018 to +0.0609, and the first-reason difference
+ranged from −2.789 to +0.311 percentage points. Median bill cancellation was
+high on each split (85.6–90.7%). These ranges describe repeated splits of one
+dataset using one model family.
+
+![Split-by-split differences. Overall ranking favors correlation groups on four of five splits. The borrower-level first reason favors them on two, with one effectively tied.](../../figures/figure-3-split-stability.png)
+
+[Vector PDF](../../figures/figure-3-split-stability.pdf) · [Full-precision results](per_split.csv) · [Protocol committed before the four new runs](https://github.com/prk0024/btech-minor-proj-dhedhan/commit/2f529e182eb95ee4d2eb0eff58e4e85e34f6c6fd)
+
 ## Protocol
 
 Use five stratified 80/20 train/test splits on the UCI Default of Credit Card
@@ -35,7 +64,7 @@ From the repository root, run the following command.
 uv run --no-project --python 3.12 --with-requirements requirements.txt python repeat_splits.py
 ```
 
-The printed run directory contains `per_split.csv` and a directory for each
+The printed run directory contains `per_split.csv`, Figure 3 (PNG and PDF), and a directory for each
 seed with its train/test/audit row indices, model metrics, groups and
 borrower-level calculations. Fractions in the CSV are on a 0–1 scale except
 for `delta_top1_pp`, which is in percentage points.

@@ -1,8 +1,9 @@
-"""Render the two report figures from a single COMET-XAI Lite pilot run."""
+"""Render report figures from COMET-XAI Lite audit results."""
 from matplotlib import rc_context
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.ticker import MaxNLocator
+from matplotlib.transforms import blended_transform_factory
 
 
 INK = '#182E40'
@@ -11,6 +12,11 @@ TEAL = '#006D70'
 SLATE = '#748498'
 RUST = '#AA5128'
 GRID = '#D6DFE2'
+STYLE = {'font.family': 'DejaVu Sans', 'pdf.fonttype': 42,
+         'axes.spines.top': False, 'axes.spines.right': False,
+         'axes.spines.bottom': False, 'axes.spines.left': False,
+         'xtick.major.size': 0, 'ytick.major.size': 0,
+         'xtick.color': MUTED, 'ytick.color': MUTED, 'axes.labelcolor': INK}
 
 
 def rule(fig, x0, x1, y0, y1):
@@ -127,13 +133,47 @@ def cancellation_figure(bills, audit):
 
 def save_figures(directory, pilot, audit, bills):
     directory.mkdir()
-    with rc_context({'font.family': 'DejaVu Sans', 'pdf.fonttype': 42,
-                     'axes.spines.top': False, 'axes.spines.right': False,
-                     'axes.spines.bottom': False, 'axes.spines.left': False,
-                     'xtick.major.size': 0, 'ytick.major.size': 0,
-                     'xtick.color': MUTED, 'ytick.color': MUTED, 'axes.labelcolor': INK}):
+    with rc_context(STYLE):
         for name, fig in [('figure-1-agreement', agreement_figure(pilot, audit)),
                           ('figure-2-cancellation', cancellation_figure(bills, audit))]:
             fig.savefig(directory / f'{name}.png', dpi=300)
             fig.savefig(directory / f'{name}.pdf', metadata={'CreationDate': None})
     print(f'Saved PNG and PDF figures to {directory.resolve()}')
+
+
+def save_split_figure(directory, rows):
+    with rc_context(STYLE):
+        fig = page(3, 'TRAIN/TEST SPLITS', 'Does the grouping advantage repeat?',
+                   'Each dot compares correlation groups with size-matched random groups on one split. Zero is a tie.')
+        fig.text(0.055, 0.665, 'Split seed', weight='bold', size=12, color=INK)
+        panels = [
+            ('delta_rbo', 0.255, 'Overall ranking', 'Difference in rank overlap', 4),
+            ('delta_top1_pp', 0.638, 'First reason per borrower', 'Difference in percentage points', 3),
+        ]
+        for field, left, title, unit, precision in panels:
+            fig.text(left, 0.665, title, size=12, weight='bold', color=INK)
+            fig.text(left, 0.619, unit, size=10, color=MUTED)
+            ax = fig.add_axes([left, 0.262, 0.225, 0.323])
+            values = [row[field] for row in rows]
+            ax.axvline(0, color=MUTED, linewidth=1)
+            ax.grid(axis='x', linewidth=0.55, color=GRID)
+            ax.set_ylim(len(rows) - 0.5, -0.5)
+            ax.set_yticks([])
+            ax.xaxis.set_major_locator(MaxNLocator(nbins=4))
+            row_coords = blended_transform_factory(fig.transFigure, ax.transData)
+            for i, (row, value) in enumerate(zip(rows, values, strict=True)):
+                color = TEAL if value >= 0 else RUST
+                ax.plot([0, value], [i, i], color=color, linewidth=1.6)
+                ax.scatter(value, i, color=color, s=34, zorder=3)
+                fig.text(left + 0.312, i, signed(value, precision), ha='right', va='center',
+                         size=10, color=INK, transform=row_coords)
+                if field == 'delta_rbo':
+                    label = str(row['split_seed']) + ('  (pilot)' if row['split_role'] == 'pilot' else '')
+                    fig.text(0.055, i, label, size=10, va='center', color=INK, transform=row_coords)
+            ax.margins(x=0.12)
+        fig.text(0.055, 0.113, 'Positive values favor correlation groups. Negative values favor random groups.',
+                 size=10.5, color=INK)
+        fig.text(0.055, 0.073, 'Each split uses 500 held-out borrowers, 10 model fits and 30 matched random partitions.',
+                 size=9, color=MUTED)
+        fig.savefig(directory / 'figure-3-split-stability.png', dpi=300)
+        fig.savefig(directory / 'figure-3-split-stability.pdf', metadata={'CreationDate': None})

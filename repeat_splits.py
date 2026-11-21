@@ -7,6 +7,7 @@ from pathlib import Path
 from tempfile import mkdtemp
 
 from demo import ROOT, PILOT_SPLIT_SEED, run
+from report_figures import save_split_figure
 
 
 SPLIT_SEEDS = (PILOT_SPLIT_SEED, 20261028, 20261029, 20261030, 20261031)
@@ -42,7 +43,7 @@ def repeat_splits(output_dir=None):
             'median_bill_cancellation': audit['median_bill_cancellation_fraction'],
         })
         print(f'{seed}  ranking overlap {rows[-1]["delta_rbo"]:+.4f}'
-              f'  first-reason agreement {rows[-1]["delta_top1_pp"]:+.2f} percentage points',
+              f'  first-reason agreement {rows[-1]["delta_top1_pp"]:+.3f} percentage points',
               flush=True)
 
     path = output_dir / 'per_split.csv'
@@ -51,6 +52,7 @@ def repeat_splits(output_dir=None):
         writer.writeheader()
         writer.writerows(rows)
     print(f'Saved per-split results to {path.resolve()}')
+    save_split_figure(output_dir, rows)
 
 
 if __name__ == '__main__':

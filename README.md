@@ -10,6 +10,15 @@ One clone includes the pilot and research materials:
 git clone https://github.com/prk0024/btech-minor-proj-dhedhan.git
 ```
 
+## Stability across five predefined splits
+
+Overall ranking agreement favored correlation grouping on four of five splits,
+including the original pilot. For each borrower's first reason, the direction
+changed across splits. Two of the four new splits favored each method, with
+one difference of just 0.005 percentage points. Median bill cancellation
+ranged from 85.6% to 90.7% across the five splits.
+[Per-split table, Figure 3, protocol and reproduction command](experiments/repeated-splits/README.md)
+
 ## Reproduce the three borrower-level results
 
 From the repository root, run this command with [uv](https://docs.astral.sh/uv/).
