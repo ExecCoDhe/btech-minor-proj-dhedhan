@@ -1,16 +1,14 @@
 # COMET-XAI Lite: preliminary executable baseline
 
-Run the pilot from the repository root. Shreya's research materials are in the
-Git submodule under [new-repo/comet_deliverables](new-repo/comet_deliverables/00_START_HERE.md).
-To get both checkouts together:
+Run the pilot from the repository root. The `new-repo/` directory contains the
+files from `Shreya732-debug/new-repo` at commit
+`32a86d4ceac71cac54a683676edb053f0f1c9e5d`. See the
+[research package index](new-repo/comet_deliverables/00_START_HERE.md).
+One clone includes the pilot and research materials:
 
 ```bash
-git clone --recurse-submodules https://github.com/prk0024/btech-minor-proj-dhedhan.git
+git clone https://github.com/prk0024/btech-minor-proj-dhedhan.git
 ```
-
-After pulling updates in an existing checkout, run
-`git submodule update --init --recursive` to restore the research revision recorded
-by this project.
 
 The recorded UCI logistic-regression pilot comes from `ExecCoDhe/Research-paper-code`
 at commit `88aef5b15a62311054c3dd92018778a735be26c0`. Its original files are in
