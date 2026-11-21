@@ -107,11 +107,12 @@ def kth_margin(shifts, alpha):
     return float('inf') if k > len(a) else float(np.sort(a)[k-1])
 
 
-def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=False):
+def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=False, figures=False):
     if bootstraps < 2 or random_partitions < 1:
         raise ValueError('Need >=2 bootstrap fits and >=1 random partition')
     start = time.perf_counter()
     path = ROOT/'data/default_of_credit_card_clients.xls'
+    borrower_audit = borrower_audit or figures
     if borrower_audit:
         from download_data import ensure_workbook
         ensure_workbook(path)
@@ -224,6 +225,9 @@ def run(bootstraps=10, random_partitions=30, *, output_dir=None, borrower_audit=
         print(f'Borrower first-place agreement (matched random groups): {control:.1%}')
         median_label = 'undefined' if median_fraction is None else f'{median_fraction:.1%}'
         print(f'Median six-month bill cancellation: {median_label}')
+        if figures:
+            from report_figures import save_figures
+            save_figures(out / 'figures', result, summary, bills)
     (out/'pilot.json').write_text(json.dumps(result,indent=2))
     print(json.dumps({k:v for k,v in result.items() if k not in ['matched_random_scores','predictive_metrics_per_fit','features']},indent=2))
     print(f"Saved pilot results to {out.resolve()}")
@@ -236,6 +240,9 @@ if __name__ == '__main__':
     parser.add_argument('--random-partitions',type=int,default=30)
     parser.add_argument('--borrower-audit', action='store_true',
                         help='Verify or download the UCI workbook and report borrower-level results')
+    parser.add_argument('--figures', action='store_true',
+                        help='Run the borrower audit and export both report figures as PNG and PDF')
     parser.add_argument('--output-dir', type=Path, help='New directory for this run (default: runs/pilot-<unique suffix>)')
     args=parser.parse_args()
-    run(args.bootstraps,args.random_partitions,output_dir=args.output_dir,borrower_audit=args.borrower_audit)
+    run(args.bootstraps, args.random_partitions, output_dir=args.output_dir,
+        borrower_audit=args.borrower_audit, figures=args.figures)

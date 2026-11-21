@@ -49,6 +49,43 @@ contributions, net, total magnitude and cancelled fraction for each borrower
 and fit. Its `audit_row_index` matches the zero-based indices in `splits.npz`.
 These descriptive results cover one dataset and one train/test split.
 
+## Report figures
+
+### Figure 1. Stability of the overall ranking and each borrower's first reason
+
+![Correlation groups achieved 0.924 overall rank overlap versus 0.863 for random groups. The same reason ranked first for an individual in 78.5% versus 80.6% of comparisons.](figures/figure-1-agreement.png)
+
+On this split, grouping related features improved the stability of the overall
+ranking by 0.061 on a 0–1 scale. The score is rank-biased overlap with
+`p = 0.85`, which gives more weight to the first few positions. For an
+individual borrower, the same reason ranked first 2.1 percentage points less
+often with correlation groups than with the size-matched random groups.
+[Vector PDF](figures/figure-1-agreement.pdf)
+
+### Figure 2. Six monthly bill contributions for one borrower
+
+![Diverging bars for six monthly bill contributions. September raised the predicted log-odds by 0.1182 and July lowered them by 0.0739. The six months together contributed +0.0388.](figures/figure-2-cancellation.png)
+
+Positive bars raised the model's predicted log-odds of default relative to its
+training background. Negative bars lowered them. For this borrower, the six
+absolute contributions summed to 0.2220 log-odds units, and **82.5% cancelled**
+when their signs were included. The median across all 5,000 borrower–fit pairs
+was 85.6%.
+[Vector PDF](figures/figure-2-cancellation.pdf)
+
+The example uses bootstrap refit 0. Among borrowers with a defined cancellation
+fraction, choose the one closest to that fit's median, breaking ties by the
+lowest zero-based audit row index. This selects row 2812.
+
+To regenerate both figures and the underlying audit in one run:
+
+```bash
+uv run --no-project --python 3.12 --with-requirements requirements.txt python demo.py --figures
+```
+
+Each run writes a 300 dpi PNG and a vector PDF of each figure in its own
+`runs/pilot-*/figures/` directory.
+
 ## Archived pilot and population-wide rankings
 
 The recorded UCI logistic-regression pilot comes from `ExecCoDhe/Research-paper-code`
