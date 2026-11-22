@@ -7,13 +7,18 @@ from pathlib import Path
 from tempfile import mkdtemp
 
 from demo import ROOT, PILOT_SPLIT_SEED, run
+from near_tie import FRESH_SEEDS
 from report_figures import save_split_figure
 
 
-SPLIT_SEEDS = (PILOT_SPLIT_SEED, 20261028, 20261029, 20261030, 20261031)
+SEED_LISTS = {
+    'original': (PILOT_SPLIT_SEED, 20261028, 20261029, 20261030, 20261031),
+    'fresh': FRESH_SEEDS,
+}
 
 
-def repeat_splits(output_dir=None):
+def repeat_splits(output_dir=None, seeds='original'):
+    split_seeds = SEED_LISTS[seeds]
     if output_dir is None:
         runs = ROOT / 'runs'
         runs.mkdir(exist_ok=True)
@@ -23,7 +28,7 @@ def repeat_splits(output_dir=None):
     print(f'Saving split audits to {output_dir.resolve()}', flush=True)
 
     rows = []
-    for seed in SPLIT_SEEDS:
+    for seed in split_seeds:
         split_dir = output_dir / str(seed)
         with (output_dir / f'{seed}.log').open('w') as log, redirect_stdout(log):
             pilot = run(bootstraps=10, random_partitions=30, split_seed=seed,
@@ -33,7 +38,7 @@ def repeat_splits(output_dir=None):
         random_top1 = audit['top1_agreement_size_matched_random_mean']
         rows.append({
             'split_seed': seed,
-            'split_role': 'pilot' if seed == PILOT_SPLIT_SEED else 'new',
+            'split_role': 'pilot' if seed == PILOT_SPLIT_SEED else ('fresh' if seeds == 'fresh' else 'new'),
             'correlation_rbo': pilot['group_RBO'],
             'random_mean_rbo': pilot['matched_random_mean_RBO'],
             'delta_rbo': pilot['group_minus_matched_random_RBO'],
@@ -62,4 +67,7 @@ def repeat_splits(output_dir=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, help='New directory for the five audits and results table')
-    repeat_splits(parser.parse_args().output_dir)
+    parser.add_argument('--seeds', choices=tuple(SEED_LISTS), default='original',
+                        help='original reproduces published splits; fresh is reserved for the frozen protocol')
+    args = parser.parse_args()
+    repeat_splits(args.output_dir, args.seeds)

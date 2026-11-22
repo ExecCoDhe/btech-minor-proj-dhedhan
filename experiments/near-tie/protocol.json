@@ -1,0 +1,14 @@
+{
+  "status": "frozen before fresh runs",
+  "tau": 0.36,
+  "tau_selection_rule": "smallest grid value whose pooled single-reason repeat rate is at least 90 percent",
+  "fresh_split_seeds": [
+    20261032,
+    20261033,
+    20261034,
+    20261035,
+    20261036
+  ],
+  "reliability_target": 0.9,
+  "meaningful_gain": "R1 - B >= 5 percentage points at >=50% coverage on >=4 of 5 fresh splits"
+}
