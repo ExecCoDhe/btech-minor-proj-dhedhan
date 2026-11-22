@@ -1,8 +1,68 @@
-# COMET-XAI Lite: preliminary executable baseline
+# COMET-XAI Lite: reproducible explanation-stability audit
 
-Run the pilot from the repository root. The `new-repo/` directory contains the
-files from `Shreya732-debug/new-repo` at commit
-`32a86d4ceac71cac54a683676edb053f0f1c9e5d`. See the
+## Submission summary
+
+The strongest supported positive result is the precommitted adaptive
+one-or-two-reason rule: after its `0.36` gap threshold was chosen on five
+exploratory splits and frozen in commit `21eff88`, the one displayed reason
+repeated **11.9–12.8 percentage points** more often than the all-case
+single-reason baseline on **all five fresh splits**, while the rule still showed
+one reason in **69.2–75.6%** of ordered fit-pair cases. This is a selective
+reliability result within the correlation-group representation. It does not
+measure prediction accuracy or prove that correlation grouping is superior.
+
+For the original five predefined splits, correlation groups had higher
+overall-ranking RBO than size-matched random groups on four splits
+(+0.0609, +0.0479, +0.0209, +0.0064; −0.0018 on the fifth). The individual
+first-reason result was mixed: correlation groups won two of five splits
+(+0.005 and +0.311 percentage points) and lost three
+(−2.062, −2.789 and −0.457 points). The four post-pilot splits were deliberately
+prespecified. Five additional fresh splits are reported separately below.
+
+Median cancellation of the six monthly bill contributions was 85.6–90.7% on
+the original splits and 84.5–91.4% on the fresh splits. Cancellation describes
+opposing signed terms inside a group; it does not establish an incorrect
+explanation. AP, ROC-AUC and Brier evaluate predictions; overall RBO evaluates
+a population ranking; first-reason agreement and the rule evaluate local
+explanation repeatability. They answer different questions.
+
+“First reason” always means the group with the largest **absolute signed**
+contribution to log-odds. It can lower predicted default risk, and the audit
+does not fit a lending decision threshold. It must not be described as a main
+reason for denial.
+
+Use [CLAIMS.md](CLAIMS.md) for an evidence ledger, including what remains
+unimplemented. The `new-repo/` directory is historical research material, not
+the executable implementation.
+
+## Reproduce from a clean checkout
+
+```bash
+uv run --no-project --python 3.12 --with-requirements requirements.txt python -m unittest -v test_demo.py test_near_tie.py
+uv run --no-project --python 3.12 --with-requirements requirements.txt python demo.py --borrower-audit --output-dir runs/pilot
+uv run --no-project --python 3.12 --with-requirements requirements.txt python repeat_splits.py --seeds original --output-dir runs/original-five
+uv run --no-project --python 3.12 --with-requirements requirements.txt python near_tie.py explore --splits-dir runs/original-five --output runs/near-tie/exploratory
+uv run --no-project --python 3.12 --with-requirements requirements.txt python repeat_splits.py --seeds fresh --output-dir runs/fresh-five
+uv run --no-project --python 3.12 --with-requirements requirements.txt python near_tie.py evaluate --splits-dir runs/fresh-five --protocol runs/near-tie/protocol.json --output runs/near-tie/fresh
+uv run --no-project --python 3.12 --with-requirements requirements.txt python check_reproduction.py --pilot-dir runs/pilot --original-csv runs/original-five/per_split.csv --fresh-csv runs/fresh-five/per_split.csv --near-tie-dir runs/near-tie/fresh
+```
+
+The `near_tie.py explore` command is exploratory and selects a threshold. The
+protocol it writes must be committed or otherwise frozen before running
+`--seeds fresh`. The committed fresh results already meet that condition. The
+clean-checkout commands reproduce the sequence rather than claiming an
+independent new validation.
+
+To regenerate the report figures from the committed machine-readable results:
+
+```bash
+uv run --no-project --python 3.12 --with-requirements requirements.txt python report_figures.py --pilot-dir experiments/pilot-borrower-audit --original-csv experiments/repeated-splits/per_split.csv --fresh-csv experiments/fresh-splits/per_split.csv --exploratory-dir experiments/near-tie/exploratory --fresh-near-tie-dir experiments/near-tie/fresh --output-dir figures
+```
+
+## Original baseline and historical material
+
+The `new-repo/` directory contains the files from `Shreya732-debug/new-repo`
+at commit `32a86d4ceac71cac54a683676edb053f0f1c9e5d`. See the
 [research package index](new-repo/comet_deliverables/00_START_HERE.md).
 One clone includes the pilot and research materials:
 

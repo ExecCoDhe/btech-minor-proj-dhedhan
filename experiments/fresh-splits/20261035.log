@@ -1,0 +1,91 @@
+Borrower first-place agreement (correlated groups): 78.7%
+Borrower first-place agreement (matched random groups): 81.4%
+Median six-month bill cancellation: 84.6%
+Undefined first-reason rows: 0
+First reason lowered predicted risk: 50.8%
+{
+  "status": "preliminary single-split real-data logistic baseline; not full method validation",
+  "dataset": "UCI Default of Credit Card Clients, ID 350",
+  "n_rows": 30000,
+  "split_seed": 20261035,
+  "train_rows": 24000,
+  "test_rows": 6000,
+  "audit_rows": 500,
+  "default_prevalence": 0.2212,
+  "groups": [
+    [
+      "PAY_AMT5"
+    ],
+    [
+      "PAY_AMT6"
+    ],
+    [
+      "PAY_AMT4"
+    ],
+    [
+      "PAY_AMT2"
+    ],
+    [
+      "PAY_AMT3"
+    ],
+    [
+      "PAY_AMT1"
+    ],
+    [
+      "BILL_AMT1",
+      "BILL_AMT2",
+      "BILL_AMT3",
+      "BILL_AMT4",
+      "BILL_AMT5",
+      "BILL_AMT6"
+    ],
+    [
+      "PAY_2",
+      "PAY_3"
+    ],
+    [
+      "PAY_4",
+      "PAY_5",
+      "PAY_6"
+    ],
+    [
+      "LIMIT_BAL"
+    ],
+    [
+      "PAY_0"
+    ]
+  ],
+  "bootstrap_fits": 10,
+  "bootstrap_pairs": 45,
+  "random_partitions": 30,
+  "mean_AP": 0.5094892352975621,
+  "mean_ROC_AUC": 0.7233577715849406,
+  "mean_Brier": 0.14388982369733702,
+  "feature_RBO": 0.813478788505428,
+  "group_RBO": 0.8860690125254946,
+  "matched_random_mean_RBO": 0.8753934876980759,
+  "matched_random_sd_RBO": 0.032992786725259515,
+  "group_minus_matched_random_RBO": 0.010675524827418736,
+  "max_logit_additivity_error": 2.6645352591003757e-15,
+  "data_sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933",
+  "python": "3.12.10",
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "xlrd": "2.0.1",
+    "matplotlib": "3.10.8"
+  },
+  "elapsed_seconds": 5.915601300002891,
+  "limitations": [
+    "one fixed split",
+    "logistic model only",
+    "no LIME or tree SHAP",
+    "bootstrap pairs dependent; no inferential p-values",
+    "no temporal, causal, recourse, or publication claim",
+    "grouping fixed; group discovery uncertainty not measured",
+    "random partition score spread is not a confidence interval"
+  ]
+}
+Saved pilot results to C:\Users\dhedh\OneDrive\Desktop\Research\Endsem eval repo replication\btech-minor-proj-dhedhan\experiments\fresh-splits\20261035

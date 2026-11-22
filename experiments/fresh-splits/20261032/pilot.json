@@ -1,0 +1,210 @@
+{
+  "status": "preliminary single-split real-data logistic baseline; not full method validation",
+  "dataset": "UCI Default of Credit Card Clients, ID 350",
+  "n_rows": 30000,
+  "split_seed": 20261032,
+  "train_rows": 24000,
+  "test_rows": 6000,
+  "audit_rows": 500,
+  "default_prevalence": 0.2212,
+  "features": [
+    "LIMIT_BAL",
+    "PAY_0",
+    "PAY_2",
+    "PAY_3",
+    "PAY_4",
+    "PAY_5",
+    "PAY_6",
+    "BILL_AMT1",
+    "BILL_AMT2",
+    "BILL_AMT3",
+    "BILL_AMT4",
+    "BILL_AMT5",
+    "BILL_AMT6",
+    "PAY_AMT1",
+    "PAY_AMT2",
+    "PAY_AMT3",
+    "PAY_AMT4",
+    "PAY_AMT5",
+    "PAY_AMT6"
+  ],
+  "groups": [
+    [
+      "BILL_AMT1",
+      "BILL_AMT2",
+      "BILL_AMT3",
+      "BILL_AMT4",
+      "BILL_AMT5",
+      "BILL_AMT6"
+    ],
+    [
+      "PAY_AMT4"
+    ],
+    [
+      "PAY_AMT6"
+    ],
+    [
+      "PAY_AMT5"
+    ],
+    [
+      "PAY_AMT1"
+    ],
+    [
+      "PAY_AMT3"
+    ],
+    [
+      "PAY_AMT2"
+    ],
+    [
+      "PAY_2",
+      "PAY_3"
+    ],
+    [
+      "PAY_4",
+      "PAY_5",
+      "PAY_6"
+    ],
+    [
+      "PAY_0"
+    ],
+    [
+      "LIMIT_BAL"
+    ]
+  ],
+  "bootstrap_fits": 10,
+  "bootstrap_pairs": 45,
+  "random_partitions": 30,
+  "predictive_metrics_per_fit": [
+    {
+      "seed": 0,
+      "AP": 0.5077400247368983,
+      "ROC_AUC": 0.7235125996783459,
+      "Brier": 0.1451576364606701,
+      "iterations": 27
+    },
+    {
+      "seed": 1,
+      "AP": 0.5044615838465608,
+      "ROC_AUC": 0.721382645030189,
+      "Brier": 0.14550938210774983,
+      "iterations": 30
+    },
+    {
+      "seed": 2,
+      "AP": 0.5078855995862948,
+      "ROC_AUC": 0.7209770699287268,
+      "Brier": 0.14558339415758045,
+      "iterations": 28
+    },
+    {
+      "seed": 3,
+      "AP": 0.5097957517968356,
+      "ROC_AUC": 0.7229496324102723,
+      "Brier": 0.1451015484853339,
+      "iterations": 29
+    },
+    {
+      "seed": 4,
+      "AP": 0.5092188606156299,
+      "ROC_AUC": 0.7232850583391159,
+      "Brier": 0.1451464045056683,
+      "iterations": 29
+    },
+    {
+      "seed": 5,
+      "AP": 0.5094376566901431,
+      "ROC_AUC": 0.7240208989705165,
+      "Brier": 0.14523408976045013,
+      "iterations": 27
+    },
+    {
+      "seed": 6,
+      "AP": 0.5055488655181231,
+      "ROC_AUC": 0.7218628846533124,
+      "Brier": 0.14586542037476874,
+      "iterations": 35
+    },
+    {
+      "seed": 7,
+      "AP": 0.5111341148649673,
+      "ROC_AUC": 0.7234776057232695,
+      "Brier": 0.1453422162552816,
+      "iterations": 31
+    },
+    {
+      "seed": 8,
+      "AP": 0.5105124104904385,
+      "ROC_AUC": 0.7231989441823841,
+      "Brier": 0.1455087914696428,
+      "iterations": 25
+    },
+    {
+      "seed": 9,
+      "AP": 0.506893269653122,
+      "ROC_AUC": 0.7212062238926147,
+      "Brier": 0.14533476553349034,
+      "iterations": 28
+    }
+  ],
+  "mean_AP": 0.5082628137799012,
+  "mean_ROC_AUC": 0.7225873562808747,
+  "mean_Brier": 0.14537836491106365,
+  "feature_RBO": 0.8113030674959131,
+  "group_RBO": 0.8894709277908197,
+  "matched_random_mean_RBO": 0.8812027022439207,
+  "matched_random_sd_RBO": 0.025135302511466954,
+  "matched_random_scores": [
+    0.8757337006820649,
+    0.8621721393133217,
+    0.8910028983331332,
+    0.9259795627669525,
+    0.8863822557821851,
+    0.9042026504919336,
+    0.8632711862453912,
+    0.8699308769991382,
+    0.8747108974829217,
+    0.9246572872430453,
+    0.8722457811223462,
+    0.8930640056351902,
+    0.8861961588953248,
+    0.8977689128537141,
+    0.835133922752536,
+    0.9043890971435093,
+    0.8599596616748252,
+    0.9203967969731748,
+    0.8532859715184388,
+    0.8308352370415795,
+    0.8738422617760975,
+    0.8652720759928638,
+    0.9141529903443488,
+    0.8711983053363367,
+    0.8935577231678706,
+    0.8586515560788067,
+    0.8530355699259647,
+    0.8686090448977876,
+    0.890312392491427,
+    0.9161301463553941
+  ],
+  "group_minus_matched_random_RBO": 0.008268225546898988,
+  "max_logit_additivity_error": 1.7763568394002505e-15,
+  "data_sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933",
+  "python": "3.12.10",
+  "versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "xlrd": "2.0.1",
+    "matplotlib": "3.10.8"
+  },
+  "elapsed_seconds": 4.625052500006859,
+  "limitations": [
+    "one fixed split",
+    "logistic model only",
+    "no LIME or tree SHAP",
+    "bootstrap pairs dependent; no inferential p-values",
+    "no temporal, causal, recourse, or publication claim",
+    "grouping fixed; group discovery uncertainty not measured",
+    "random partition score spread is not a confidence interval"
+  ]
+}

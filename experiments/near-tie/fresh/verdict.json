@@ -1,0 +1,6 @@
+{
+  "tau": 0.36,
+  "splits_meeting_gain_rule": 5,
+  "meaningful_gain": true,
+  "rule": "R1 - B >= 5 percentage points at >=50% coverage on >=4 of 5 fresh splits"
+}
