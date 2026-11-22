@@ -31,9 +31,10 @@ contribution to log-odds. It can lower predicted default risk, and the audit
 does not fit a lending decision threshold. It must not be described as a main
 reason for denial.
 
-Use [CLAIMS.md](CLAIMS.md) for an evidence ledger, including what remains
-unimplemented. The `new-repo/` directory is historical research material, not
-the executable implementation.
+Use [RESEARCH_SUMMARY.md](RESEARCH_SUMMARY.md) for the complete research
+summary and [CLAIMS.md](CLAIMS.md) for an evidence ledger, including what
+remains unimplemented. The `new-repo/` directory is historical research
+material, not the executable implementation.
 
 ## Reproduce from a clean checkout
 
