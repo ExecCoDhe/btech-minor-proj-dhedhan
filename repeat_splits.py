@@ -41,6 +41,10 @@ def repeat_splits(output_dir=None):
             'random_mean_top1': random_top1,
             'delta_top1_pp': 100 * (top1 - random_top1),
             'median_bill_cancellation': audit['median_bill_cancellation_fraction'],
+            'undefined_first_reason_rows': audit['undefined_first_reason_rows'],
+            'tied_top_first_reason_rows': audit['tied_top_first_reason_rows'],
+            'top1_defined_only': audit['top1_agreement_defined_only'],
+            'top_group_lowers_risk_share': audit['top_group_lowers_risk_share'],
         })
         print(f'{seed}  ranking overlap {rows[-1]["delta_rbo"]:+.4f}'
               f'  first-reason agreement {rows[-1]["delta_top1_pp"]:+.3f} percentage points',
